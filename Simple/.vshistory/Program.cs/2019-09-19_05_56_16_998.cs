@@ -1,6 +1,6 @@
 using System;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -15,18 +15,23 @@ namespace Simple
 {
     public class Program
     {
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).Build().RunAsync();
+        public static async System.Threading.Tasks.Task Main(string[] args) => await CreateHostBuilder(args).Build().RunAsync();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
             // ASP.NET Core 3.0+:
             // The UseServiceProviderFactory call attaches the
             // Autofac provider to the generic hosting mechanism.
             //https://autofaccn.readthedocs.io/en/latest/integration/aspnetcore.html#quick-start-with-configurecontainer
             //https://github.com/autofac/Autofac.Extensions.DependencyInjection/tree/v5.0.0-rc1
-            Host.CreateDefaultBuilder(args)
+            return Host.CreateDefaultBuilder(args)
                    .ConfigureWebHostDefaults(webBuilder =>
                    {
-                       webBuilder.UseStartup<Startup>();
+                       webBuilder
+                               .UseContentRoot(Directory.GetCurrentDirectory())
+                               .UseIISIntegration()
+                               .UseStartup<Startup>()
+                      ;
                    })
                     //https://github.com/autofac/Autofac.Extensions.DependencyInjection/pull/52
                     //.UseAutofacChildScopeFactory()
@@ -66,5 +71,6 @@ namespace Simple
                         //System.InvalidCastException: 'Unable to cast object of type 'Microsoft.Extensions.DependencyInjection.ServiceCollection' to type 'Autofac.ContainerBuilder'.'
                     })
             ;
+        }
     }
 }

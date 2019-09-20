@@ -1,32 +1,31 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 
-using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
-
-using Simple.Services;
 
 namespace Simple
 {
     public class Program
     {
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).Build().RunAsync();
+        public static async System.Threading.Tasks.Task Main(string[] args) => await CreateHostBuilder(args).Build().RunAsync();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
             // ASP.NET Core 3.0+:
             // The UseServiceProviderFactory call attaches the
             // Autofac provider to the generic hosting mechanism.
             //https://autofaccn.readthedocs.io/en/latest/integration/aspnetcore.html#quick-start-with-configurecontainer
             //https://github.com/autofac/Autofac.Extensions.DependencyInjection/tree/v5.0.0-rc1
-            Host.CreateDefaultBuilder(args)
+            return Host.CreateDefaultBuilder(args)
                    .ConfigureWebHostDefaults(webBuilder =>
                    {
-                       webBuilder.UseStartup<Startup>();
+                       webBuilder
+                               .UseContentRoot(Directory.GetCurrentDirectory())
+                               .UseIISIntegration()
+                               .UseStartup<Startup>()
+                      ;
                    })
                     //https://github.com/autofac/Autofac.Extensions.DependencyInjection/pull/52
                     //.UseAutofacChildScopeFactory()
@@ -44,27 +43,28 @@ namespace Simple
                     //services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory());
                     //.UseServiceProviderFactory<AutofacServiceProviderFactory>() //IServiceProviderFactory<ContainerBuilder> //Add Singleton
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                    .ConfigureContainer<ContainerBuilder>(builder =>
-                    {
-                        //builder.RegisterType<TestService>().As<ITestService>().PropertiesAutowired();
-                        //builder.RegisterType<TestRepository>().As<ITestRepository>().InstancePerLifetimeScope();
+            //.ConfigureContainer<ContainerBuilder>(builder =>
+            //{
+            //    //builder.RegisterType<TestService>().As<ITestService>().PropertiesAutowired();
+            //    //builder.RegisterType<TestRepository>().As<ITestRepository>().InstancePerLifetimeScope();
 
-                        Type[] controllersTypesInAssembly = typeof(Startup).Assembly.GetExportedTypes()
-                            .Where(type => typeof(ControllerBase).IsAssignableFrom(type)).ToArray();
+            //    Type[] controllersTypesInAssembly = typeof(Startup).Assembly.GetExportedTypes()
+            //        .Where(type => typeof(ControllerBase).IsAssignableFrom(type)).ToArray();
 
-                        builder.RegisterTypes(controllersTypesInAssembly).PropertiesAutowired();
+            //    builder.RegisterTypes(controllersTypesInAssembly).PropertiesAutowired();
 
-                        builder.RegisterType<PrintMessages>().As<IPrintMessages>().PropertiesAutowired();
+            //    builder.RegisterType<PrintMessages>().As<IPrintMessages>().PropertiesAutowired();
 
-                        //IContainer container = builder.Build();
-                        //ITestService testService = container.Resolve<ITestService>();
-                        //string result = testService.PrintTest("SinulMSBH");
+            //    //IContainer container = builder.Build();
+            //    //ITestService testService = container.Resolve<ITestService>();
+            //    //string result = testService.PrintTest("SinulMSBH");
 
-                        //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1
-                        //https://mderriey.com/2018/08/02/autofac-integration-in-asp-net-core-generic-hosts/
-                        // registering services in the Autofac ContainerBuilder
-                        //System.InvalidCastException: 'Unable to cast object of type 'Microsoft.Extensions.DependencyInjection.ServiceCollection' to type 'Autofac.ContainerBuilder'.'
-                    })
+            //    //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1
+            //    //https://mderriey.com/2018/08/02/autofac-integration-in-asp-net-core-generic-hosts/
+            //    // registering services in the Autofac ContainerBuilder
+            //    //System.InvalidCastException: 'Unable to cast object of type 'Microsoft.Extensions.DependencyInjection.ServiceCollection' to type 'Autofac.ContainerBuilder'.'
+            //})
             ;
+        }
     }
 }

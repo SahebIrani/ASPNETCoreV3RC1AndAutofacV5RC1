@@ -4,8 +4,10 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 using Simple.Services;
 
@@ -15,16 +17,27 @@ namespace Simple
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         public ILifetimeScope AutofacContainer { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
             // Add services to the collection. Don't build or return
             // any IServiceProvider or the ConfigureContainer method
             // won't get called.
             //services.AddAutofac();
             services.AddOptions();
+
+            //services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory());
 
             // This adds the required middleware to the ROOT CONTAINER and is required for multitenancy to work.
             //AddAutofacMultitenantRequestServices();
@@ -103,7 +116,7 @@ namespace Simple
         //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // If, for some reason, you need a reference to the built container, you
             // can use the convenience extension method GetAutofacRoot.
@@ -112,15 +125,28 @@ namespace Simple
             //return autofacServiceProvider.LifetimeScope;
             //AutofacContainer.ChildLifetimeScopeBeginning
             AutofacContainer = app.ApplicationServices.GetAutofacRoot();
-            if (AutofacContainer.IsRegistered<IPrintMessages>())
+            bool IsMyPrintServiceRegister = AutofacContainer.IsRegistered<IPrintMessages>();
+
+            if (env.IsDevelopment())
             {
-                app.Use(async (context, next) =>
-                {
-                    IPrintMessages service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
-                    string newContent = service.Print() + service.Print(" SinjulMSBH .. !!!!");
-                    await context.Response.WriteAsync(newContent);
-                });
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapDefaultControllerRoute();
+            });
         }
     }
 }

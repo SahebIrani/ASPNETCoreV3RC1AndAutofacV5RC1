@@ -1,9 +1,11 @@
 using System;
+using System.IO;
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +27,8 @@ namespace Simple
             // won't get called.
             //services.AddAutofac();
             services.AddOptions();
+
+            //services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory());
 
             // This adds the required middleware to the ROOT CONTAINER and is required for multitenancy to work.
             //AddAutofacMultitenantRequestServices();
@@ -103,7 +107,7 @@ namespace Simple
         //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // If, for some reason, you need a reference to the built container, you
             // can use the convenience extension method GetAutofacRoot.
@@ -112,15 +116,34 @@ namespace Simple
             //return autofacServiceProvider.LifetimeScope;
             //AutofacContainer.ChildLifetimeScopeBeginning
             AutofacContainer = app.ApplicationServices.GetAutofacRoot();
-            if (AutofacContainer.IsRegistered<IPrintMessages>())
+            bool IsMyPrintServiceRegister = AutofacContainer.IsRegistered<IPrintMessages>();
+
+
+            app.Use(async (context, next) =>
             {
-                app.Use(async (context, next) =>
+                var newContent = string.Empty;
+
+                using (var newBody = new MemoryStream())
                 {
-                    IPrintMessages service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
-                    string newContent = service.Print() + service.Print(" SinjulMSBH .. !!!!");
+                    // We set the response body to our stream so we can read after the chain of middlewares have been called.
+                    context.Response.Body = newBody;
+
+                    await next();
+
+                    // Reset the body so nothing from the latter middlewares goes to the output.
+                    context.Response.Body = new MemoryStream();
+
+                    newBody.Seek(0, SeekOrigin.Begin);
+
+                    // newContent will be `Hello`.
+                    newContent = new StreamReader(newBody).ReadToEnd();
+
+                    newContent += ", World!";
+
+                    // Send our modified content to the response body.
                     await context.Response.WriteAsync(newContent);
-                });
-            }
+                }
+            });
         }
     }
 }

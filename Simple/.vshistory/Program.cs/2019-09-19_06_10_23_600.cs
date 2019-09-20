@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -15,7 +14,7 @@ namespace Simple
 {
     public class Program
     {
-        public static async Task Main(string[] args) => await CreateHostBuilder(args).Build().RunAsync();
+        public static async System.Threading.Tasks.Task Main(string[] args) => await CreateHostBuilder(args).Build().RunAsync();
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             // ASP.NET Core 3.0+:

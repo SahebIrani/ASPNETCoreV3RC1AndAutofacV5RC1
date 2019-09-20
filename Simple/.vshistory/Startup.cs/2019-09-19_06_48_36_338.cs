@@ -9,8 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Simple.Services;
 
-using TaghelperWorkerServiceModelBinderFluentValidationAjax.Modules;
-
 namespace Simple
 {
     public class Startup
@@ -25,6 +23,8 @@ namespace Simple
             // won't get called.
             //services.AddAutofac();
             services.AddOptions();
+
+            //services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory());
 
             // This adds the required middleware to the ROOT CONTAINER and is required for multitenancy to work.
             //AddAutofacMultitenantRequestServices();
@@ -116,7 +116,7 @@ namespace Simple
             {
                 app.Use(async (context, next) =>
                 {
-                    IPrintMessages service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
+                    var service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
                     string newContent = service.Print() + service.Print(" SinjulMSBH .. !!!!");
                     await context.Response.WriteAsync(newContent);
                 });

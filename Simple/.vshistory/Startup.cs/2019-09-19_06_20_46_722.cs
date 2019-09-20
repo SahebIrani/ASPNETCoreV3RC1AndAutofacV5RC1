@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -25,6 +26,8 @@ namespace Simple
             // won't get called.
             //services.AddAutofac();
             services.AddOptions();
+
+            //services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory());
 
             // This adds the required middleware to the ROOT CONTAINER and is required for multitenancy to work.
             //AddAutofacMultitenantRequestServices();
@@ -116,8 +119,15 @@ namespace Simple
             {
                 app.Use(async (context, next) =>
                 {
-                    IPrintMessages service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
-                    string newContent = service.Print() + service.Print(" SinjulMSBH .. !!!!");
+                    var newContent = string.Empty;
+                    using var newBody = new MemoryStream();
+                    context.Response.Body = newBody;
+                    await next();
+                    context.Response.Body = new MemoryStream();
+                    newBody.Seek(0, SeekOrigin.Begin);
+                    newContent = new StreamReader(newBody).ReadToEnd();
+                    var service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
+                    newContent += service.Print();
                     await context.Response.WriteAsync(newContent);
                 });
             }
