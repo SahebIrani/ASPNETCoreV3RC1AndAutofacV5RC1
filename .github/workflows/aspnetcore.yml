@@ -1,0 +1,19 @@
+name: ASP.NET Core CI 9-30-2019 8:28 AM
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.0.100
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+    - name: Publish with dotnet
+      run: dotnet publish /home/runner/work/ASPNETCoreV3RC1AndAutofacV5RC1/ASPNETCoreV3RC1AndAutofacV5RC1/Simple/Simple.csproj --configuration Release	  
