@@ -1,4 +1,4 @@
-name: ASP.NET Core CI 9-30-2019 8:28 AM
+name: ASP.NET Core CI 9-30-2019 8:31 AM
 
 on: [push]
 
@@ -16,4 +16,4 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Publish with dotnet
-      run: dotnet publish /home/runner/work/ASPNETCoreV3RC1AndAutofacV5RC1/ASPNETCoreV3RC1AndAutofacV5RC1/Simple/Simple.csproj --configuration Release	  
+      run: dotnet publish /home/runner/work/ASPNETCoreV3RC1AndAutofacV5RC1/ASPNETCoreV3RC1AndAutofacV5RC1/Simple/Simple.csproj -o /home/runner/work/ASPNETCoreV3RC1AndAutofacV5RC1/ASPNETCoreV3RC1AndAutofacV5RC1/PublishOutput --configuration Release	  
