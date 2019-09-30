@@ -18,8 +18,6 @@ namespace Simple
     {
         public ILifetimeScope AutofacContainer { get; private set; }
 
-        public IContainer ApplicationContainer { get; private set; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -52,27 +50,6 @@ namespace Simple
             }
             configurationAdapter.Add(builder => builder.RegisterType<IPrintMessages>( ));
             //var service = serviceProvider.GetRequiredService<IPrintMessages>();
-        }
-
-        // This only gets called if your environment is Development. The
-        // default ConfigureServices won't be automatically called if this
-        // one is called.
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public /*void*/ IServiceProvider ConfigureDevelopmentServices(IServiceCollection services)
-        {
-            // Add things to the service collection that are only for the
-            // development environment.
-
-            services.AddMvc( );
-
-            // Create the container builder.
-            var builder = new ContainerBuilder();
-            builder.Populate(services);
-            builder.RegisterType<PrintMessages>( ).As<IPrintMessages>( ).PropertiesAutowired( );
-            this.ApplicationContainer = builder.Build( );
-
-            // Create the IServiceProvider based on the container.
-            return new AutofacServiceProvider(this.ApplicationContainer);
         }
 
         private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder( ).Build( );

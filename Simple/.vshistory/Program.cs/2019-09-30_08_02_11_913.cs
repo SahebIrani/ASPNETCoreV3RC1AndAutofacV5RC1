@@ -11,24 +11,11 @@ using Microsoft.Extensions.Hosting;
 
 using Simple.Services;
 
-using TaghelperWorkerServiceModelBinderFluentValidationAjax.Modules;
-
 namespace Simple
 {
     public class Program
     {
         public static async Task Main(string[] args) => await CreateHostBuilder(args).Build( ).RunAsync( );
-
-        //public static IWebAssemblyHostBuilder CreateHostBuilder(string[] args) =>
-        //  BlazorWebAssemblyHost.CreateDefaultBuilder( )
-        //    .UseServiceProviderFactory(new AutofacServiceProviderFactory(Register))
-        //    .UseBlazorStartup<Startup>( );
-
-        private static void Register(ContainerBuilder builder)
-        {
-            // add any registrations here
-            builder.RegisterModule<AutofacModule>( );
-        }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             // ASP.NET Core 3.0+:
@@ -37,10 +24,10 @@ namespace Simple
             //https://autofaccn.readthedocs.io/en/latest/integration/aspnetcore.html#quick-start-with-configurecontainer
             //https://github.com/autofac/Autofac.Extensions.DependencyInjection/tree/v5.0.0-rc1
             Host.CreateDefaultBuilder(args)
+                    .UseServiceProviderFactory(new AutofacServiceProviderFactory( ))
                    .ConfigureWebHostDefaults(webBuilder =>
                    {
                        webBuilder.ConfigureServices(services => services.AddAutofac( ));
-
                        webBuilder.UseStartup<Startup>( );
                    })
                     //https://github.com/autofac/Autofac.Extensions.DependencyInjection/pull/52
@@ -56,13 +43,9 @@ namespace Simple
                     //{
                     //	return services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory(configurationAction));
                     //}
-
                     //services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacServiceProviderFactory());
-                    //.UseServiceProviderFactory(new AutofacChildLifetimeScopeServiceProviderFactory())
                     //.UseServiceProviderFactory<AutofacServiceProviderFactory>() //IServiceProviderFactory<ContainerBuilder> //Add Singleton
-                    //.UseServiceProviderFactory(new AutofacMultitenantServiceProviderFactory(Startup.ConfigureMultitenantContainer))
-                    .UseServiceProviderFactory(new AutofacServiceProviderFactory( ))
-                    .UseServiceProviderFactory(new AutofacServiceProviderFactory(Register))
+                    //.UseServiceProviderFactory(new AutofacServiceProviderFactory())
                     .ConfigureContainer<ContainerBuilder>(builder =>
                     {
                         //builder.RegisterType<TestService>().As<ITestService>().PropertiesAutowired();
@@ -79,7 +62,6 @@ namespace Simple
                         //ITestService testService = container.Resolve<ITestService>();
                         //string result = testService.PrintTest("SinulMSBH");
 
-                        //https://github.com/autofac/Autofac.Extensions.DependencyInjection/issues/47
                         //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1
                         //https://mderriey.com/2018/08/02/autofac-integration-in-asp-net-core-generic-hosts/
                         // registering services in the Autofac ContainerBuilder

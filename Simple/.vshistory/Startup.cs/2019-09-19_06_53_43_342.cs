@@ -6,7 +6,6 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 using Simple.Services;
 
@@ -18,8 +17,6 @@ namespace Simple
     {
         public ILifetimeScope AutofacContainer { get; private set; }
 
-        public IContainer ApplicationContainer { get; private set; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -27,7 +24,7 @@ namespace Simple
             // any IServiceProvider or the ConfigureContainer method
             // won't get called.
             //services.AddAutofac();
-            services.AddOptions( );
+            services.AddOptions();
 
             // This adds the required middleware to the ROOT CONTAINER and is required for multitenancy to work.
             //AddAutofacMultitenantRequestServices();
@@ -42,46 +39,25 @@ namespace Simple
             var factory = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScope);
             var factory2 = new AutofacChildLifetimeScopeServiceProviderFactory(GetRootLifetimeScopeWithDependency<IPrintMessages>(typeof(IPrintMessages)));
             var myServices = new ServiceCollection().AddTransient<IPrintMessages>();
-            services.AddSingleton<IPrintMessages>( );
+            services.AddSingleton<IPrintMessages>();
             var configurationAdapter = factory.CreateBuilder(services);
             var serviceProvider = factory.CreateServiceProvider(configurationAdapter);
             var builder = new ContainerBuilder();
-            foreach( var action in configurationAdapter.ConfigurationActions )
+            foreach (var action in configurationAdapter.ConfigurationActions)
             {
                 action(builder);
             }
-            configurationAdapter.Add(builder => builder.RegisterType<IPrintMessages>( ));
+            configurationAdapter.Add(builder => builder.RegisterType<IPrintMessages>());
             //var service = serviceProvider.GetRequiredService<IPrintMessages>();
         }
 
-        // This only gets called if your environment is Development. The
-        // default ConfigureServices won't be automatically called if this
-        // one is called.
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public /*void*/ IServiceProvider ConfigureDevelopmentServices(IServiceCollection services)
-        {
-            // Add things to the service collection that are only for the
-            // development environment.
-
-            services.AddMvc( );
-
-            // Create the container builder.
-            var builder = new ContainerBuilder();
-            builder.Populate(services);
-            builder.RegisterType<PrintMessages>( ).As<IPrintMessages>( ).PropertiesAutowired( );
-            this.ApplicationContainer = builder.Build( );
-
-            // Create the IServiceProvider based on the container.
-            return new AutofacServiceProvider(this.ApplicationContainer);
-        }
-
-        private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder( ).Build( );
+        private static ILifetimeScope GetRootLifetimeScope() => new ContainerBuilder().Build();
 
         private static ILifetimeScope GetRootLifetimeScopeWithDependency<TAs>(Type type)
         {
             var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterType(type).As<TAs>( );
-            return containerBuilder.Build( );
+            containerBuilder.RegisterType(type).As<TAs>();
+            return containerBuilder.Build();
         }
 
         // Use this method to add services directly to LightInject
@@ -107,7 +83,7 @@ namespace Simple
             // method or this won't be called.
             //builder.RegisterModule(new AutofacModule());
 
-            builder.RegisterModule<AutofacModule>( );
+            builder.RegisterModule<AutofacModule>();
         }
 
         // This only gets called if your environment is Production. The
@@ -119,27 +95,11 @@ namespace Simple
             // production environment.
         }
 
-        // This only gets called if your environment is Staging. The
-        // default Configure won't be automatically called if this one is called.
-        public void ConfigureStaging(IApplicationBuilder app , ILoggerFactory loggerFactory)
-        {
-            // Set up the application for staging.
-        }
-
         // Here's the change for child lifetime scope usage! Register your "root"
         // child lifetime scope things with the adapter.
         //public void ConfigureContainer(AutofacChildLifetimeScopeConfigurationAdapter config)
         //{
         //    config.Add(builder => builder.RegisterModule(new AutofacModule()));
-        //}
-
-        //public static MultitenantContainer ConfigureMultitenantContainer(IContainer container)
-        //{
-        //    // This is the MULTITENANT PART. Set up your tenant-specific stuff here.
-        //    var strategy = new MyTenantIdentificationStrategy();
-        //    var mtc = new MultitenantContainer(strategy, container);
-        //    mtc.ConfigureTenant("a" , cb => cb.RegisterType<TenantDependency>( ).As<IDependency>( ));
-        //    return mtc;
         //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -151,10 +111,10 @@ namespace Simple
             //    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, ServiceProviderExtensionsResources.WrongProviderType, serviceProvider?.GetType()));
             //return autofacServiceProvider.LifetimeScope;
             //AutofacContainer.ChildLifetimeScopeBeginning
-            AutofacContainer = app.ApplicationServices.GetAutofacRoot( );
-            if( AutofacContainer.IsRegistered<IPrintMessages>( ) )
+            AutofacContainer = app.ApplicationServices.GetAutofacRoot();
+            if (AutofacContainer.IsRegistered<IPrintMessages>())
             {
-                app.Use(async (context , next) =>
+                app.Use(async (context, next) =>
                 {
                     IPrintMessages service = app.ApplicationServices.GetRequiredService<IPrintMessages>();
                     string newContent = service.Print() + service.Print(" SinjulMSBH .. !!!!");

@@ -68,7 +68,7 @@ namespace Simple
             // Create the container builder.
             var builder = new ContainerBuilder();
             builder.Populate(services);
-            builder.RegisterType<PrintMessages>( ).As<IPrintMessages>( ).PropertiesAutowired( );
+            //builder.RegisterType<DataProvider>( ).As<IDataProvider>( );
             this.ApplicationContainer = builder.Build( );
 
             // Create the IServiceProvider based on the container.

@@ -79,7 +79,6 @@ namespace Simple
                         //ITestService testService = container.Resolve<ITestService>();
                         //string result = testService.PrintTest("SinulMSBH");
 
-                        //https://github.com/autofac/Autofac.Extensions.DependencyInjection/issues/47
                         //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1
                         //https://mderriey.com/2018/08/02/autofac-integration-in-asp-net-core-generic-hosts/
                         // registering services in the Autofac ContainerBuilder
